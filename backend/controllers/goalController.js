@@ -4,10 +4,10 @@ const User = require('../models/userModel');
 // @desc Get goals
 // @route GET /api/goals
 // @access Private
-const getGoals = async (req, res) => {
+const getGoals = asyncHandler(async (req, res) => {
     const goals = await Goal.find({ user: req.user.id });
     res.status(200).json(goals);
-}
+})
 
 // @desc Set goal
 // @route POST /api/goals
@@ -22,7 +22,7 @@ const setGoal = asyncHandler(async (req, res) => {
         user: req.user.id
     })
 
-    res.status(200).json({ goal });
+    res.status(200).json( goal );
 })
 
 // @desc Update goal
@@ -36,16 +36,15 @@ const updateGoal = asyncHandler(async (req, res) => {
         throw new Error(`Goal with id: ${req.params.id} not found`);
     }
 
-    const user = await User.findById(req.user.id);
     
     //Check if user exists
-    if (!user) {
+    if (!req.user) {
         res.status(401)
         throw new Error('User not found')
     }
 
     //Check if logged in user is owner of the goal
-    if (goal.user.toString() !== user.id) {
+    if (goal.user.toString() !== req.user.id) {
         res.status(401)
         throw new Error('User not authorized to delete goal')
     }
@@ -66,22 +65,21 @@ const deleteGoal = asyncHandler(async (req, res) => {
         throw new Error(`Cannot find Goal with id: ${req.params.id}`);
     }
 
-    const user = await User.findById(req.user.id);
     
     //Check if user exists
-    if (!user) {
+    if (!req.user) {
         res.status(401)
         throw new Error('User not found')
     }
 
     //Check if logged in user is owner of the goal
-    if (goal.user.toString() !== user.id) {
+    if (goal.user.toString() !== req.user.id) {
         res.status(401)
         throw new Error('User not authorized to delete goal')
     }
 
     await goal.deleteOne()
-    res.status(200).json({ text: `Deleted goal with id: ${req.params.id}`});
+    res.status(200).json({ id: req.params.id});
 })
 
 module.exports = {
